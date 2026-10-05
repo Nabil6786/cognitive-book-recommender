@@ -1,216 +1,348 @@
-# Semantic Book Recommender
+# 🧠 Cognitive Computing Based Semantic Book Recommendation System Using NLP
 
-An intelligent book recommendation system powered by large language models, vector embeddings, and sentiment analysis. This project demonstrates end-to-end development of a production-ready recommendation engine that understands semantic meaning, categorizes content intelligently, and filters by emotional tone.
+A semantic book recommendation system that uses **Natural Language Processing (NLP)** and **sentence embeddings** to understand the meaning of a user's query and recommend books based on semantic similarity.
 
-## Overview
+Unlike traditional keyword-based search, this system can understand related concepts and meanings in a user's query and retrieve relevant books from the dataset.
 
-This semantic book recommender goes beyond traditional keyword matching by leveraging transformer-based embeddings to understand the true meaning and context of book descriptions. Users can search using natural language queries, filter by category, and sort by emotional tone to discover books that match their mood and interests.
+---
 
-## Project Architecture
+## 📌 Project Overview
 
-The system processes book data through a sequential pipeline, transforming raw data into a searchable, categorized, and emotion-annotated dataset.
+The **Cognitive Computing Based Semantic Book Recommendation System Using NLP** is designed to provide intelligent and meaning-based book recommendations.
 
-**Data Pipeline Flow:**
-1. Raw dataset (7k books from Kaggle) → Data cleaning and feature engineering
-2. Cleaned data → Vector embeddings generation → ChromaDB persistence
-3. Cleaned data → Zero-shot category classification → Category assignment
-4. Cleaned data → Sentence-level emotion analysis → Emotion scores
-5. Final dataset + Vector DB → Streamlit dashboard for user interaction
+The system converts book information and user queries into numerical **vector embeddings** using a pre-trained Hugging Face Sentence Transformer model. These embeddings are stored and searched using **ChromaDB**, allowing the system to find books that are semantically similar to the user's query.
 
-**Technical Implementation Details:**
+The application provides an interactive interface using **Streamlit**.
 
-**Embedding Generation:**
-- Uses OpenAI's `text-embedding-3-small` model via LangChain
-- Processes descriptions with ISBN prefixes for vector-to-book mapping
-- Implements token-based batching (250K tokens/batch) to handle OpenAI's 300K token request limit
-- Stores embeddings in ChromaDB with persistent index in `data/chroma_index/`
+### Example
 
-**Category Classification:**
-- Maps 500+ raw categories to 4 simplified categories: Fiction, Nonfiction, Children's Fiction, Children's Nonfiction
-- Uses Hugging Face BART-large-MNLI for zero-shot classification
-- Validates on 300 labeled samples achieving 75-80% accuracy
-- Fills missing categories for books without manual labels
+A user can enter:
 
-**Emotion Analysis:**
-- Splits book descriptions into sentences for granular analysis
-- Processes each sentence through fine-tuned RoBERTa emotion classifier
-- Extracts maximum probability per emotion across all sentences (7 emotions: anger, disgust, fear, joy, sadness, surprise, neutral)
-- Aggregates to single max score per emotion per book
+> `books about artificial intelligence and machine learning`
 
-**Search & Retrieval:**
-- User query → OpenAI embedding → Cosine similarity search in ChromaDB
-- Retrieves top 50 semantically similar books
-- Filters by category if specified
-- Sorts by emotion scores if tone selected
-- Returns top 16 results to dashboard
+The system analyzes the meaning of the query and returns books that are semantically related to the topic.
 
-## Data Flow & Processing
+---
 
-**Input:** Raw CSV with 7,000+ books from Kaggle dataset
+## 🎯 Objectives
 
-**Processing Steps:**
-1. **Data Cleaning:** Removes books with missing descriptions, filters descriptions < 25 words, handles missing subtitles
-2. **Feature Engineering:** Creates `tag_description` column (ISBN + description) for vector search linking
-3. **Embedding Generation:** Converts all descriptions to 1536-dimensional vectors using OpenAI embeddings
-4. **Category Assignment:** Maps known categories, classifies unknown using zero-shot
-5. **Emotion Scoring:** Processes 5,197 books through emotion classifier, extracts max scores
-6. **Output:** Final dataset with categories, emotions, and vector index ready for search
+* Build an intelligent semantic book recommendation system.
+* Apply NLP techniques to understand user queries.
+* Generate text embeddings using a pre-trained transformer model.
+* Store and search embeddings using a vector database.
+* Recommend books based on semantic similarity.
+* Provide a simple and interactive web interface.
+* Demonstrate the application of cognitive computing concepts in recommendation systems.
 
-**Vector Search Query Flow:**
-```
-User Query ("book about forgiveness")
-  → Embedding generation (OpenAI API)
-  → Similarity search (ChromaDB, cosine similarity)
-  → Top 50 results with scores
-  → ISBN extraction from document text
-  → DataFrame lookup by ISBN
-  → Category filter (if specified)
-  → Emotion sort (if tone selected)
-  → Top 16 results returned
-```
+---
 
-**Performance Characteristics:**
-- Vector search: ~200-500ms (embedding + similarity computation)
-- DataFrame filtering: < 50ms
-- Emotion sorting: < 10ms
-- Total response time: < 1 second for typical queries
+## ✨ Key Features
 
-## System Architecture
+* 🔎 **Semantic Search** – Understands the meaning of a query rather than relying only on exact keywords.
+* 🧠 **NLP-Based Recommendations** – Uses sentence embeddings to represent text.
+* 🤗 **Hugging Face Embeddings** – Uses `all-MiniLM-L6-v2`, a pre-trained Sentence Transformer model.
+* 🗄️ **ChromaDB Vector Database** – Stores and searches vector embeddings.
+* 📚 **Book Recommendations** – Retrieves relevant books from the book dataset.
+* 🖥️ **Streamlit Interface** – Provides an easy-to-use interactive application.
+* 💻 **Free Local AI Model** – Does not require a paid OpenAI API for generating embeddings.
 
-**Data Processing Pipeline:**
+---
 
-The project follows a notebook-based ETL workflow where each phase outputs artifacts used by subsequent phases:
+## 🏗️ System Architecture
 
-```
-Raw Data (Kaggle) 
-  ↓ [01_data_exploration_cleaning.ipynb]
-  books_cleaned.csv (5,197 books, 25+ word descriptions)
-  ↓
-  ├─→ [02_vector_search.ipynb] → tag_description.txt → ChromaDB embeddings → data/chroma_index/
-  ├─→ [03_text_classification.ipynb] → books_with_categories.csv (all categories assigned)
-  └─→ [04_sentiment_analysis.ipynb] → books_with_emotions.csv (7 emotion columns)
+```text
+                    User Query
+                        │
+                        ▼
+              ┌──────────────────┐
+              │   Streamlit UI   │
+              └────────┬─────────┘
+                       │
+                       ▼
+              ┌──────────────────┐
+              │   NLP / Text     │
+              │   Processing     │
+              └────────┬─────────┘
+                       │
+                       ▼
+          ┌──────────────────────────┐
+          │ Sentence Transformer     │
+          │ all-MiniLM-L6-v2         │
+          └────────────┬─────────────┘
+                       │
+                       ▼
+                Query Embedding
+                       │
+                       ▼
+              ┌──────────────────┐
+              │    ChromaDB      │
+              │ Vector Database  │
+              └────────┬─────────┘
+                       │
+                       ▼
+             Semantic Similarity
+                       │
+                       ▼
+              Relevant Book Results
 ```
 
-**Vector Database Structure:**
-- Each document stored as: `"{ISBN} {description}"`
-- Enables ISBN extraction from search results for book lookup
-- Persisted to disk to avoid re-embedding on startup
-- Load time: < 2 seconds for 272 document embeddings
+---
 
-**Category Mapping Logic:**
-- 12 major categories manually mapped (e.g., "Juvenile Fiction" → "Children's Fiction")
-- Remaining books classified via zero-shot with candidate labels: ["Fiction", "Nonfiction"]
-- Missing categories filled automatically using description text
+## 🧠 How the System Works
 
-**Emotion Processing Workflow:**
-- Description split by periods into sentences
-- Batch processing: all sentences from one book classified together
-- Score aggregation: max probability per emotion across sentences
-- Result: 7 float columns (0-1 range) per book
+### 1. Book Dataset
 
-**Dashboard Implementation:**
-- Loads pre-computed data on startup (cached with `@st.cache_data` and `@st.cache_resource`)
-- Vector DB loaded once per session (not rebuilt)
-- Search function: `similarity_search()` → ISBN extraction → DataFrame filtering → Emotion sorting
-- UI: 4-column responsive grid with book covers, titles, authors, truncated descriptions
+The system uses a book dataset containing information about books.
 
-## Technical Decisions & Trade-offs
+The relevant text information is processed and prepared for embedding.
 
-**Embedding Model Choice:**
-OpenAI's `text-embedding-3-small` selected over local models for accuracy and API simplicity. Trade-off: requires API key and incurs costs (~$0.10 per 1K searches).
+### 2. Text Embedding
 
-**Vector Database:**
-ChromaDB chosen for persistence and LangChain integration. Alternative vector stores (Pinecone, Weaviate) would require cloud infrastructure.
+The project uses:
 
-**Token Batching:**
-Implemented custom token counting using `tiktoken` to batch embeddings within OpenAI's 300K token/request limit. Processes 250K tokens per batch to leave buffer.
+**Model:** `sentence-transformers/all-MiniLM-L6-v2`
 
-**Category Simplification:**
-Reduced 500+ categories to 4 simplified categories for better filtering UX. Zero-shot classification handles generalization without training data.
+The model converts text into numerical vectors that represent the semantic meaning of the text.
 
-**Emotion Granularity:**
-Sentence-level processing chosen over whole-description to capture emotional variety. Max aggregation ensures strongest emotion per book is captured.
+### 3. Vector Database
 
-**Data Format:**
-CSV files used for simplicity and version control. For production, consider SQLite or PostgreSQL for better query performance.
+The generated embeddings are stored in **ChromaDB**.
 
-**Caching Strategy:**
-Streamlit's `@st.cache_data` for CSV loads, `@st.cache_resource` for vector DB. Prevents reloading on every user interaction.
+This allows the application to efficiently search for books that are semantically similar to a user's query.
 
-## Technical Stack
+### 4. User Query
 
-- **Languages**: Python 3.9+
-- **Data Processing**: Pandas, NumPy
-- **Machine Learning**: Transformers (Hugging Face), OpenAI API
-- **Vector Database**: ChromaDB with LangChain integration
-- **NLP Models**: 
-  - BART-large-MNLI for zero-shot classification
-  - RoBERTa-based emotion classifier (j-hartmann/emotion-english-distilroberta-base)
-- **Web Framework**: Streamlit
-- **Data Visualization**: Matplotlib, Seaborn
-- **Environment Management**: python-dotenv
+The user enters a natural-language query through the Streamlit interface.
 
-## Project Structure
+For example:
 
+```text
+books about artificial intelligence and machine learning
 ```
-llm-semantic-book-recommender/
-├── notebooks/
-│   ├── 01_data_exploration_cleaning.ipynb
-│   ├── 02_vector_search.ipynb
-│   ├── 03_text_classification.ipynb
-│   └── 04_sentiment_analysis.ipynb
+
+### 5. Semantic Search
+
+The query is converted into an embedding using the same Sentence Transformer model.
+
+ChromaDB compares the query embedding with stored book embeddings and identifies the most semantically similar results.
+
+### 6. Recommendations
+
+The application displays the most relevant books to the user.
+
+---
+
+## 🛠️ Technologies Used
+
+| Technology                             | Purpose                                         |
+| -------------------------------------- | ----------------------------------------------- |
+| **Python**                             | Main programming language                       |
+| **Natural Language Processing**        | Understanding and representing text             |
+| **Hugging Face Sentence Transformers** | Generating text embeddings                      |
+| **all-MiniLM-L6-v2**                   | Pre-trained embedding model                     |
+| **ChromaDB**                           | Vector database and similarity search           |
+| **LangChain**                          | Integration with embeddings and vector database |
+| **Streamlit**                          | Interactive web application                     |
+| **Pandas**                             | Dataset processing                              |
+| **Git & GitHub**                       | Version control and project hosting             |
+
+---
+
+## 📂 Project Structure
+
+```text
+cognitive-book-recommender/
+│
 ├── data/
-│   ├── books_cleaned.csv
-│   ├── books_with_categories.csv
 │   ├── books_with_emotions.csv
-│   └── chroma_index/ (persisted vector database)
+│   └── ...
+│
+├── scripts/
+│   └── rebuild_chroma.py
+│
+├── notebooks/
+│   └── ...
+│
 ├── streamlit_dashboard.py
 ├── requirements.txt
-└── README.md
+├── .gitignore
+├── README.md
+└── ...
 ```
 
-## Getting Started
+> The generated Chroma vector index is created locally when required and is excluded from Git using `.gitignore`.
 
-1. **Set up environment**
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   pip install -r requirements.txt
-   ```
+---
 
-2. **Configure API keys**
-   Create a `.env` file in the project root:
-   ```
-   OPENAI_API_KEY=your_key_here
-   ```
+## ⚙️ Installation
 
-3. **Run notebooks sequentially**
-   Execute notebooks 01-04 in order to generate all required data files.
+### 1. Clone the repository
 
-4. **Rebuild the Chroma index locally**
-   ```bash
-   source venv/bin/activate  # if not already active
-   python scripts/rebuild_chroma.py
-   ```
+```bash
+git clone https://github.com/Nabil6786/cognitive-book-recommender.git
+```
 
-5. **Launch dashboard**
-   ```bash
-   streamlit run streamlit_dashboard.py
-   ```
+### 2. Open the project directory
 
-## Performance Metrics
+```bash
+cd cognitive-book-recommender
+```
 
-- **Dataset Size**: 5,197 books after cleaning and filtering
-- **Vector Database**: 272 embeddings stored in persistent ChromaDB
-- **Category Classification**: 75-80% accuracy on validation set
-- **Emotion Analysis**: Sentence-level processing with 7 emotion dimensions
-- **Search Response Time**: Sub-second for semantic similarity queries
+### 3. Create a virtual environment
 
-## Future Enhancements
+```bash
+python -m venv venv
+```
 
-Potential improvements include multi-modal embeddings that incorporate book cover images, collaborative filtering based on user ratings, and advanced emotion modeling that captures emotional arcs throughout books. The architecture supports easy integration of additional features such as author-based recommendations, reading time estimation, and personalized ranking algorithms.
+### 4. Activate the virtual environment
 
-## License
+**Windows:**
 
-This project is developed for learning and portfolio purposes. Dataset sourced from Kaggle's "7k books" dataset.
+```bash
+venv\Scripts\activate
+```
 
+### 5. Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+## 🔨 Build the Vector Index
+
+Before running the application, generate the ChromaDB vector index:
+
+```bash
+python scripts/rebuild_chroma.py
+```
+
+The script generates embeddings for the book dataset using the Hugging Face Sentence Transformer model and stores them in ChromaDB.
+
+---
+
+## ▶️ Run the Application
+
+Start the Streamlit application:
+
+```bash
+streamlit run streamlit_dashboard.py
+```
+
+The application will open in your browser.
+
+Usually:
+
+```text
+http://localhost:8501
+```
+
+---
+
+## 🔍 Example Queries
+
+You can test the application with queries such as:
+
+```text
+books about artificial intelligence and machine learning
+```
+
+```text
+science fiction books about robots
+```
+
+```text
+books related to technology and computers
+```
+
+```text
+books about human emotions and relationships
+```
+
+The system retrieves books based on **semantic similarity**.
+
+---
+
+## 📊 Dataset
+
+The project uses a book dataset containing information used to generate semantic representations of books.
+
+The dataset is processed using Python and Pandas before generating vector embeddings.
+
+The current vector index contains approximately **5,197 book documents**.
+
+---
+
+## 🧩 Cognitive Computing Concept
+
+This project demonstrates concepts related to **cognitive computing** by allowing a computer system to process natural-language input and retrieve information based on semantic meaning.
+
+The main cognitive computing concepts demonstrated are:
+
+* Natural Language Understanding
+* Semantic Representation
+* Similarity-Based Retrieval
+* Machine Learning Models
+* Intelligent Recommendation
+* Human-like natural language interaction
+
+---
+
+## 💡 Advantages
+
+* More flexible than simple keyword matching.
+* Understands the semantic meaning of queries.
+* Uses a pre-trained transformer model.
+* Does not require a paid OpenAI API for embeddings.
+* Provides an interactive user interface.
+* Can be extended to larger datasets.
+
+---
+
+## 🚀 Future Scope
+
+The project can be further improved by adding:
+
+* Personalized recommendations based on user history.
+* User login and profiles.
+* Book ratings and reviews.
+* Hybrid recommendation using collaborative filtering.
+* More advanced transformer models.
+* Recommendation explanations.
+* Book cover images and additional metadata.
+* Deployment on a cloud platform with sufficient resources.
+
+---
+
+## 🎓 Academic Project
+
+**Project Title:**
+**Cognitive Computing Based Semantic Book Recommendation System Using NLP**
+
+**Student:**
+**Mohammad Nabil Bagwan**
+
+**Course:**
+B.Tech Data Science
+
+**Institution:**
+MGM University / Institute of Information and Communication Technology
+
+---
+
+## 👨‍💻 Author
+
+**Mohammad Nabil Bagwan**
+
+GitHub:
+https://github.com/Nabil6786
+
+LinkedIn:
+https://www.linkedin.com/in/mohammad-nabil-0086bb330
+
+---
+
+## 📜 License
+
+This project is developed for **academic and educational purposes**.
