@@ -1,0 +1,58 @@
+# Environment
+venv/
+env/
+.venv
+ENV/
+env.bak/
+venv.bak/
+.env
+.envrc
+
+# Data files (exclude large raw datasets, but keep processed files for deployment)
+# data/*.csv
+# data/*.txt
+# data/*.json
+!data/.gitkeep
+
+# Vector database artifacts (rebuild locally)
+data/chroma_index/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+*.egg
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Type checking
+.mypy_cache/
+.pytype/
+
+# Cursor
+.cursorignore
+.cursorindexingignore
